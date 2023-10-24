@@ -1,0 +1,76 @@
+<html>
+<head>
+<title>test1</title>
+<script src="sjcl.js"></script>
+<script src="xcryptor.js"></script>
+<script>
+function doCrypto (cryptor) {
+	let myparams = {data: "test note"};
+	myparams.type = XCryptor.TYPE_NOTE;
+	cryptor.encrypt(myparams);
+	cryptor.decrypt(myparams);
+	console.log(myparams.data);
+
+	myparams.data = "test filename"
+	myparams.type = XCryptor.TYPE_FILENAME;
+	cryptor.encrypt(myparams);
+	cryptor.decrypt(myparams);
+	console.log(myparams.data);
+
+	myparams.data = "test filetype"
+	myparams.type = XCryptor.TYPE_FILETYPE;
+	cryptor.encrypt(myparams);
+	cryptor.decrypt(myparams);
+	console.log(myparams.data);
+
+	myparams.type = XCryptor.TYPE_FILEDATA;
+	myparams.data = sjcl.codec.arrayBuffer.fromBits(sjcl.codec.utf8String.toBits("test filedata"));
+	cryptor.encrypt(myparams);
+	cryptor.decrypt(myparams);
+	let mystr = sjcl.codec.utf8String.fromBits(sjcl.codec.arrayBuffer.toBits(myparams.data));
+	console.log(mystr);
+	for (let i = 0; i < mystr.length; i++) {
+		console.log(mystr.charCodeAt(i));
+	}
+}
+function doTest1 () {
+	// New user, with password rotation
+	let mycrypt = new XCryptor("012345678901234");
+	let mydek = mycrypt.dek;
+	mycrypt.pwd = "123456789012345";
+	mydek = mycrypt.dek;
+	doCrypto(mycrypt);
+
+	// Returning user
+	mycrypt = new XCryptor("123456789012345", mydek);
+	doCrypto(mycrypt);
+}
+function doTest2 () {
+	// New user
+	let mycrypt = new XCryptor("012345678901234");
+	let mydek = mycrypt.dek;
+	mycrypt.pwd = "123456789012345";
+	mydek = mycrypt.dek;
+
+	let myparams = {data: "test note"};
+	myparams.type = XCryptor.TYPE_NOTE;
+	mycrypt.encrypt(myparams);
+	console.log(myparams.data);
+
+	// Returning user
+	mycrypt = new XCryptor("123456789012345", mydek);
+	mycrypt.decrypt(myparams);
+	console.log(myparams.data);	
+}
+
+function doTest3() {
+	let mydigestobj1 = XCryptor.createPwdDigest("123456789012345");
+	let mydigestobj2 = XCryptor.createPwdDigest("123456789012345");
+}
+</script>
+</head>
+<body>
+
+<input type="button" value="Go" onclick="doTest1(); doTest2(); doTest3();">
+</body>
+</html>
